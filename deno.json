@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env --unstable-kv src/main.ts"
+  },
+  "imports": {
+    "@mistralai/mistralai": "npm:@mistralai/mistralai@^1.5.2",
+    "matrix-js-sdk": "https://deno.land/x/matrix_js_sdk@v0.1.0/mod.ts",
+    "openai": "https://deno.land/x/openai@1.4.0/mod.ts",
+    "dotenv": "https://deno.land/std@0.200.0/dotenv/mod.ts"
+  }
+} 
