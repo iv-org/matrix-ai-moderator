@@ -1,21 +1,23 @@
 # Matrix Harm Detection Bot
 
-A Deno-based Matrix bot that protects rooms by monitoring new members and their messages for inappropriate content using OpenAI's API.
+A Deno-based Matrix bot that protects rooms by monitoring new members and their messages for inappropriate content using OpenAI's API or any other OpenAI compatible API.
 
 ## Features
 
 - Monitors new room members
 - Checks usernames for inappropriate content
-- Temporarily stores new members in Deno KV for 60 minutes
+- Temporarily stores new members in Deno KV for monitoring
 - Monitors messages from new members
-- Uses OpenAI API to detect inappropriate content
-- Automatically bans users and removes inappropriate content
+- Uses OpenAI API or any other OpenAI compatible API to detect inappropriate content
+- Two-strike warning system for inappropriate content
+- Automatic message deletion and user banning
+- Required number of valid messages before removing monitoring
 
 ## Prerequisites
 
 - Deno (latest version)
 - Matrix account for the bot
-- OpenAI API key
+- OpenAI API key or OpenAI compatible API key (openrouter for example) 
 - Access to a Matrix room you want to protect
 
 ## Setup
@@ -31,6 +33,8 @@ A Deno-based Matrix bot that protects rooms by monitoring new members and their 
    - `MATRIX_PASSWORD`: Bot's Matrix password
    - `MATRIX_ROOM_ID`: ID of the room to protect
    - `OPENAI_API_KEY`: Your OpenAI API key
+   - `CHECKS_REQUIRED_VALID_MESSAGES`: Number of valid messages required before removing monitoring (default: 5)
+   - `CHECKS_NEW_MEMBER_DURATION_HOURS`: How long to monitor new members (default: 60 hours)
 
 ## Running the Bot
 
@@ -43,13 +47,23 @@ deno task start
 1. When a new member joins the room:
    - Their username is checked for inappropriate content
    - If inappropriate, they are banned immediately
-   - If appropriate, they are added to a temporary watchlist (60 minutes)
+   - If appropriate, they are added to a monitoring list for the specified duration
 
-2. For messages from new members:
+2. For messages from monitored members:
    - The content is checked for inappropriate material
-   - If inappropriate, the message is deleted and the user is banned
-   - If appropriate, the message remains
+   - If inappropriate:
+     - The message is deleted
+     - First offense: User receives a warning
+     - Second offense: User is banned
+   - If appropriate:
+     - Message count is incremented
+     - Once the required number of valid messages is reached, monitoring is removed
+
+3. Warning System:
+   - First inappropriate message: Warning message with 24-hour expiration
+   - Second inappropriate message: Immediate ban
+   - Warnings expire after 24 hours
 
 ## Note
 
-The bot uses OpenAI's GPT-3.5-turbo model for content moderation. Make sure you have sufficient API credits and understand the costs associated with API usage. 
+The bot in the Invidious room uses Mistral AI hosted in Europe for content moderation. They claim to not store the content sent to their servers, see their privacy policy: https://mistral.ai/terms/#privacy-policy

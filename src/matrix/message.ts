@@ -35,7 +35,7 @@ export function setupMessageHandler() {
       // Check if sender is in the new members list
       const isNewMember = await kv.get(["new_members", sender]);
       
-      if (isNewMember) {
+      if (isNewMember.value !== null) {
         let inappropriate = false;
         
         if (content.msgtype === "m.text") {
@@ -53,7 +53,7 @@ export function setupMessageHandler() {
           
           // Check if this is the first or second warning
           const warningCount = await kv.get(["warnings", sender]);
-          if (!warningCount || !warningCount.value) {
+          if (warningCount.value === null) {
             // First warning
             const username = sender.split(':')[0].slice(1);
             const warningMessage = `
@@ -90,7 +90,7 @@ export function setupMessageHandler() {
         } else {
           // Message passed checks - increment counter
           const validMessagesCount = await kv.get(["valid_messages", sender]);
-          const newCount = (validMessagesCount?.value as number || 0) + 1;
+          const newCount = (validMessagesCount.value as number || 0) + 1;
           
           if (newCount >= config.checks.requiredValidMessages) {
             // User has sent enough valid messages, remove from checks

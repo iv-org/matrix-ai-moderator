@@ -10,6 +10,7 @@ const openai = new OpenAI({
 // Function to make OpenAI API calls
 export async function callOpenAIAPI(messages: any[], model: string, maxTokens = 300): Promise<string> {
   try {
+    console.log(messages)
     const response = await openai.chat.completions.create({
       model,
       messages,
@@ -22,4 +23,4 @@ export async function callOpenAIAPI(messages: any[], model: string, maxTokens = 
     console.error('Error calling OpenAI API:', error);
     return "false";
   }
-} 
+}
