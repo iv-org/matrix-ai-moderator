@@ -91,7 +91,7 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                             matrixClient.ban(
                                 room.roomId,
                                 sender,
-                                "Explicit image content",
+                                "Automoderator: Explicit image content",
                             )
                         );
 
@@ -178,7 +178,7 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                         matrixClient.ban(
                             room.roomId,
                             sender,
-                            "Inappropriate content after warning",
+                            "Automoderator: Inappropriate content after warning",
                         )
                     );
 

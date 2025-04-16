@@ -38,7 +38,7 @@ export function setupMemberHandler() {
                     await matrixClient.ban(
                         config.matrix.roomId,
                         username,
-                        "Inappropriate username",
+                        "Automoderator: Inappropriate username",
                     );
 
                     // Remove the user from KV storage
