@@ -7,6 +7,8 @@ WORKDIR /app
 COPY ./src/ /app/src/
 COPY deno.json /app/
 
+RUN apt update && apt install -y curl
+
 RUN curl -fsSL https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-$(dpkg --print-architecture) \
         --output /tini \
     && chmod +x /tini
