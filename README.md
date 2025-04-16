@@ -32,7 +32,10 @@ A Deno-based Matrix bot that protects rooms by monitoring new members and their 
    - `MATRIX_USERNAME`: Bot's Matrix username
    - `MATRIX_PASSWORD`: Bot's Matrix password
    - `MATRIX_ROOM_ID`: ID of the room to protect
-   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `OPENAI_API_KEY`: Your OpenAI API key or OpenAI compatible API key
+   - `OPENAI_API_URL`: The API endpoint URL (default: https://api.openai.com/v1)
+   - `OPENAI_TEXT_MODEL`: The model to use for text analysis (default: gpt-3.5-turbo)
+   - `OPENAI_VISION_MODEL`: The model to use for image analysis (default: gpt-4-vision-preview)
    - `CHECKS_REQUIRED_VALID_MESSAGES`: Number of valid messages required before removing monitoring (default: 5)
    - `CHECKS_NEW_MEMBER_DURATION_HOURS`: How long to monitor new members (default: 60 hours)
 
