@@ -1,11 +1,18 @@
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-read --allow-write --allow-env --unstable-kv src/main.ts"
+    "start": "deno run --allow-net --allow-read=.env --allow-env src/main.ts",
+    "compile": "deno compile --allow-net --allow-read=.env --allow-env --output ai_matrix_harm_detection src/main.ts"
   },
   "imports": {
     "matrix-js-sdk": "npm:matrix-js-sdk@^37.3.0",
     "openai": "npm:openai@^4.94.0",
     "dotenv": "jsr:@std/dotenv@0.225.3/load",
     "@onjara/optic": "jsr:@onjara/optic@^2.0.3"
+  },
+  "unstable": [
+    "kv"
+  ],
+  "fmt": {
+    "indentWidth": 4
   }
 } 

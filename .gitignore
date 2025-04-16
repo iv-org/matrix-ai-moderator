@@ -42,3 +42,5 @@ Untitled*.ipynb
 
 # playwright browser binary cache
 /.ms-playwright
+
+ai_matrix_harm_detection

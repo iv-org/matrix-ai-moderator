@@ -18,7 +18,12 @@ export async function callOpenAIAPI(messages: any[], model: string, maxTokens = 
       temperature: 0,
     });
 
-    return response.choices[0].message.content;
+    const content = response.choices[0].message.content;
+    if (!content) {
+      log.error('OpenAI API returned empty content');
+      return "false";
+    }
+    return content;
   } catch (error: any) {
     log.error('Error calling OpenAI API:', error);
     return "false";
