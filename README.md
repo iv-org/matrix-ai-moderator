@@ -1,6 +1,8 @@
 # Matrix Harm Detection Bot
 
-A Deno-based Matrix bot that protects rooms by monitoring new members and their messages for inappropriate content using OpenAI's API or any other OpenAI compatible API.
+A Deno-based Matrix bot that protects rooms by monitoring new members and their
+messages for inappropriate content using OpenAI's API or any other OpenAI
+compatible API.
 
 ## Features
 
@@ -8,7 +10,8 @@ A Deno-based Matrix bot that protects rooms by monitoring new members and their 
 - Checks usernames for inappropriate content
 - Temporarily stores new members in Deno KV for monitoring
 - Monitors messages from new members
-- Uses OpenAI API or any other OpenAI compatible API to detect inappropriate content
+- Uses OpenAI API or any other OpenAI compatible API to detect inappropriate
+  content
 - Two-strike warning system for inappropriate content
 - Automatic message deletion and user banning
 - Required number of valid messages before removing monitoring
@@ -18,7 +21,7 @@ A Deno-based Matrix bot that protects rooms by monitoring new members and their 
 
 - Deno (latest version)
 - Matrix account for the bot
-- OpenAI API key or OpenAI compatible API key (openrouter for example) 
+- OpenAI API key or OpenAI compatible API key (openrouter for example)
 - Access to a Matrix room you want to protect
 
 ## Setup
@@ -35,11 +38,16 @@ A Deno-based Matrix bot that protects rooms by monitoring new members and their 
    - `MATRIX_ROOM_ID`: ID of the room to protect
    - `OPENAI_API_KEY`: Your OpenAI API key or OpenAI compatible API key
    - `OPENAI_API_URL`: The API endpoint URL (default: https://api.openai.com/v1)
-   - `OPENAI_TEXT_MODEL`: The model to use for text analysis (default: gpt-3.5-turbo)
-   - `OPENAI_VISION_MODEL`: The model to use for image analysis (default: gpt-4-vision-preview)
-   - `CHECKS_REQUIRED_VALID_MESSAGES`: Number of valid messages required before removing monitoring (default: 5)
-   - `CHECKS_NEW_MEMBER_DURATION_HOURS`: How long to monitor new members (default: 60 hours)
-   - `CHECKS_MIN_MESSAGE_LENGTH`: Minimum length of messages to check for inappropriate content (default: 10 characters)
+   - `OPENAI_TEXT_MODEL`: The model to use for text analysis (default:
+     gpt-3.5-turbo)
+   - `OPENAI_VISION_MODEL`: The model to use for image analysis (default:
+     gpt-4-vision-preview)
+   - `CHECKS_REQUIRED_VALID_MESSAGES`: Number of valid messages required before
+     removing monitoring (default: 5)
+   - `CHECKS_NEW_MEMBER_DURATION_HOURS`: How long to monitor new members
+     (default: 60 hours)
+   - `CHECKS_MIN_MESSAGE_LENGTH`: Minimum length of messages to check for
+     inappropriate content (default: 10 characters)
 
 ## Running the Bot
 
@@ -52,7 +60,8 @@ deno task start
 1. When a new member joins the room:
    - Their username is checked for inappropriate content
    - If inappropriate, they are banned immediately
-   - If appropriate, they are added to a monitoring list for the specified duration
+   - If appropriate, they are added to a monitoring list for the specified
+     duration
 
 2. For messages from monitored members:
    - Messages shorter than the minimum length are skipped
@@ -63,7 +72,8 @@ deno task start
      - Second offense: User is banned
    - If appropriate:
      - Message count is incremented
-     - Once the required number of valid messages is reached, monitoring is removed
+     - Once the required number of valid messages is reached, monitoring is
+       removed
 
 3. Warning System:
    - First inappropriate message: Warning message with 24-hour expiration
@@ -72,4 +82,6 @@ deno task start
 
 ## Note
 
-The bot in the Invidious room uses Mistral AI hosted in Europe for content moderation. They claim to not store the content sent to their servers, see their privacy policy: https://mistral.ai/terms/#privacy-policy
+The bot in the Invidious room uses Mistral AI hosted in Europe for content
+moderation. They claim to not store the content sent to their servers, see their
+privacy policy: https://mistral.ai/terms/#privacy-policy

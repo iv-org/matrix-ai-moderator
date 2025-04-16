@@ -14,9 +14,12 @@ setupMemberHandler();
 setupMessageHandler();
 
 // Login to Matrix
-await matrixClient.loginWithPassword(config.matrix.username, config.matrix.password);
+await matrixClient.loginWithPassword(
+    config.matrix.username,
+    config.matrix.password,
+);
 
 // Start the client
 await matrixClient.startClient();
 
-log.info("Bot started successfully!"); 
+log.info("Bot started successfully!");
