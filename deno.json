@@ -3,9 +3,9 @@
     "start": "deno run --allow-net --allow-read --allow-write --allow-env --unstable-kv src/main.ts"
   },
   "imports": {
-    "@mistralai/mistralai": "npm:@mistralai/mistralai@^1.5.2",
-    "matrix-js-sdk": "https://deno.land/x/matrix_js_sdk@v0.1.0/mod.ts",
-    "openai": "https://deno.land/x/openai@1.4.0/mod.ts",
-    "dotenv": "https://deno.land/std@0.200.0/dotenv/mod.ts"
+    "matrix-js-sdk": "npm:matrix-js-sdk@^37.3.0",
+    "openai": "npm:openai@^4.94.0",
+    "dotenv": "jsr:@std/dotenv@0.225.3/load",
+    "@onjara/optic": "jsr:@onjara/optic@^2.0.3"
   }
 } 

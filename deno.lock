@@ -1,9 +1,30 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@onjara/optic@*": "2.0.3",
+    "jsr:@onjara/optic@^2.0.3": "2.0.3",
+    "jsr:@std/dotenv@0.225.3": "0.225.3",
+    "jsr:@std/fmt@^1.0.2": "1.0.6",
     "npm:@mistralai/mistralai@^1.5.2": "1.5.2_zod@3.24.2",
+    "npm:dotenv@^16.4.5": "16.5.0",
+    "npm:loglevel@*": "1.9.2",
     "npm:matrix-js-sdk@*": "37.3.0",
-    "npm:openai@*": "4.94.0"
+    "npm:matrix-js-sdk@^37.3.0": "37.3.0",
+    "npm:openai@^4.94.0": "4.94.0"
+  },
+  "jsr": {
+    "@onjara/optic@2.0.3": {
+      "integrity": "b4bf8cae0820a3c3f362ba4d78939237fcfa23e3087bbd3f9fd3c883839820f1",
+      "dependencies": [
+        "jsr:@std/fmt"
+      ]
+    },
+    "@std/dotenv@0.225.3": {
+      "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
+    },
+    "@std/fmt@1.0.6": {
+      "integrity": "a2c56a69a2369876ddb3ad6a500bb6501b5bad47bb3ea16bfb0c18974d2661fc"
+    }
   },
   "npm": {
     "@babel/runtime@7.27.0": {
@@ -35,8 +56,8 @@
         "form-data"
       ]
     },
-    "@types/node@18.19.84": {
-      "integrity": "sha512-ACYy2HGcZPHxEeWTqowTF7dhXN+JU1o7Gr4b41klnn6pj2LD6rsiGqSZojMdk1Jh2ys3m76ap+ae1vvE4+5+vg==",
+    "@types/node@18.19.86": {
+      "integrity": "sha512-fifKayi175wLyKyc5qUfyENhQ1dCNI1UNjp653d8kuYcPQN5JhX3dGuP/XmvPTg/xRBn1VTLpbmi+H/Mr7tLfQ==",
       "dependencies": [
         "undici-types@5.26.5"
       ]
@@ -95,6 +116,9 @@
     },
     "delayed-stream@1.0.0": {
       "integrity": "sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ=="
+    },
+    "dotenv@16.5.0": {
+      "integrity": "sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg=="
     },
     "dunder-proto@1.0.1": {
       "integrity": "sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==",
@@ -268,7 +292,7 @@
     "openai@4.94.0": {
       "integrity": "sha512-WVmr9HWcwfouLJ7R3UHd2A93ClezTPuJljQxkCYQAL15Sjyt+FBNoqEz5MHSdH/ebQrVyvRhFyn/bvdqtSPyIA==",
       "dependencies": [
-        "@types/node@18.19.84",
+        "@types/node@18.19.86",
         "@types/node-fetch",
         "abort-controller",
         "agentkeepalive",
@@ -373,6 +397,9 @@
     "https://deno.land/std@0.200.0/collections/filter_values.ts": "16e1fc456a7969e770ec5b89edf5ac97b295ca534b47c1a83f061b409aad7814",
     "https://deno.land/std@0.200.0/collections/without_all.ts": "1e3cccb1ed0659455b473c0766d9414b7710d8cef48862c899f445178f66b779",
     "https://deno.land/std@0.200.0/dotenv/mod.ts": "2caa157ee5afbf74bd85bd6e8f286cb6363a1e4d10cf3376223346b33a7ea75e",
+    "https://deno.land/std@0.224.0/dotenv/mod.ts": "0180eaeedaaf88647318811cdaa418cc64dc51fb08354f91f5f480d0a1309f7d",
+    "https://deno.land/std@0.224.0/dotenv/parse.ts": "09977ff88dfd1f24f9973a338f0f91bbdb9307eb5ff6085446e7c423e4c7ba0c",
+    "https://deno.land/std@0.224.0/dotenv/stringify.ts": "275da322c409170160440836342eaa7cf012a1d11a7e700d8ca4e7f2f8aa4615",
     "https://deno.land/x/openai@1.4.0/mod.ts": "33d22d2e4612a1a2f0ca2f395c806587f4201532d57ee609b34c91b491ee8496",
     "https://deno.land/x/openai@1.4.0/src/openai.ts": "0eba8f41e7e26d4566addeca7ca1a878d3820811cd85343573bdc537badc676e",
     "https://deno.land/x/openai@1.4.0/src/types.ts": "3392bf28b0715e97ce8f3c8dcedc33b33fc8a219469304b9c418d0337e480979",
@@ -486,7 +513,10 @@
   },
   "workspace": {
     "dependencies": [
-      "npm:@mistralai/mistralai@^1.5.2"
+      "jsr:@onjara/optic@^2.0.3",
+      "jsr:@std/dotenv@0.225.3",
+      "npm:matrix-js-sdk@^37.3.0",
+      "npm:openai@^4.94.0"
     ]
   }
 }

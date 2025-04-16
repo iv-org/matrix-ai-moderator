@@ -3,7 +3,8 @@ import { config } from "../config.ts";
 import { isMessageInappropriate } from "../checks/message.ts";
 import { analyzeImage } from "../checks/image.ts";
 import { kv } from "../storage.ts";
-import { MsgType, RoomEvent, MatrixEvent, Room, IRoomTimelineData } from "npm:matrix-js-sdk";
+import { MsgType, RoomEvent, MatrixEvent, Room, IRoomTimelineData } from "matrix-js-sdk";
+import { log } from "../logger.ts";
 
 export function setupMessageHandler() {
   matrixClient.on(RoomEvent.Timeline, async (event: MatrixEvent, room: Room | undefined, _toStartOfTimeline: boolean | undefined, _removed: boolean, _data: IRoomTimelineData) => {
@@ -18,7 +19,7 @@ export function setupMessageHandler() {
     if (sender === config.matrix.username || 
         sender === `${config.matrix.username}:${config.matrix.homeserverUrl.split('://')[1]}` ||
         (content.msgtype === "m.text" && content.body.includes("Your message has been deleted"))) {
-      console.log('Skipping bot message or warning message');
+      log.debug('Skipping bot message or warning message');
       return;
     }
     
@@ -27,7 +28,7 @@ export function setupMessageHandler() {
     const botStartTime = (await kv.get(["bot_start_time"])).value as number;
     
     if (messageTimestamp <= botStartTime) {
-      console.log('Skipping old message from:', sender);
+      log.debug('Skipping old message from:', sender);
       return;
     }
     
@@ -39,6 +40,11 @@ export function setupMessageHandler() {
         let inappropriate = false;
         
         if (content.msgtype === "m.text") {
+          // Skip short messages
+          if (content.body.length < config.checks.minMessageLength) {
+            log.debug('Skipping short message from:', sender);
+            return;
+          }
           inappropriate = await isMessageInappropriate(content.body);
         } else if (content.msgtype === "m.image") {
           const imageUrl = content.url;
@@ -81,7 +87,7 @@ export function setupMessageHandler() {
             });
           } else {
             // Second warning - ban the user
-            console.log('Banning user:', sender, 'from room:', room.roomId);
+            log.warn('Banning user:', sender, 'from room:', room.roomId);
             await matrixClient.ban(room.roomId, sender, "Inappropriate content after warning");
             // Remove the user from KV storage
             await kv.delete(["new_members", sender]);
@@ -94,7 +100,7 @@ export function setupMessageHandler() {
           
           if (newCount >= config.checks.requiredValidMessages) {
             // User has sent enough valid messages, remove from checks
-            console.log('User', sender, 'has sent', config.checks.requiredValidMessages, 'valid messages, removing from checks');
+            log.info('User', sender, 'has sent', config.checks.requiredValidMessages, 'valid messages, removing from checks');
             await kv.delete(["new_members", sender]);
             await kv.delete(["valid_messages", sender]);
             await kv.delete(["warnings", sender]);

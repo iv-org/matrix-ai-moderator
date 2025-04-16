@@ -3,6 +3,7 @@ import { setupMemberHandler } from "./matrix/member.ts";
 import { setupMessageHandler } from "./matrix/message.ts";
 import { config } from "./config.ts";
 import { kv } from "./storage.ts";
+import { log } from "./logger.ts";
 
 // Store bot start time
 const botStartTime = Date.now();
@@ -18,4 +19,4 @@ await matrixClient.loginWithPassword(config.matrix.username, config.matrix.passw
 // Start the client
 await matrixClient.startClient();
 
-console.log("Bot started successfully!"); 
+log.info("Bot started successfully!"); 

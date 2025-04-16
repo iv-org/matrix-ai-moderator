@@ -1,23 +1,24 @@
-import { load } from "https://deno.land/std@0.200.0/dotenv/mod.ts";
-
-// Load environment variables
-const env = await load();
+import "dotenv";
 
 export const config = {
   matrix: {
-    homeserverUrl: env.MATRIX_HOMESERVER_URL,
-    username: env.MATRIX_USERNAME,
-    password: env.MATRIX_PASSWORD,
-    roomId: env.MATRIX_ROOM_ID,
+    homeserverUrl: Deno.env.get("MATRIX_HOMESERVER_URL") || "",
+    username: Deno.env.get("MATRIX_USERNAME") || "",
+    password: Deno.env.get("MATRIX_PASSWORD") || "",
+    roomId: Deno.env.get("MATRIX_ROOM_ID") || "",
   },
   openai: {
-    apiKey: env.OPENAI_API_KEY,
-    apiUrl: env.OPENAI_API_URL,
-    textModel: env.OPENAI_TEXT_MODEL,
-    visionModel: env.OPENAI_VISION_MODEL,
+    apiKey: Deno.env.get("OPENAI_API_KEY") || "",
+    apiUrl: Deno.env.get("OPENAI_API_URL") || "https://api.openai.com/v1",
+    textModel: Deno.env.get("OPENAI_TEXT_MODEL") || "gpt-3.5-turbo",
+    visionModel: Deno.env.get("OPENAI_VISION_MODEL") || "gpt-4-vision-preview",
   },
   checks: {
-    newMemberCheckDurationHours: parseInt(env.CHECKS_NEW_MEMBER_DURATION_HOURS || "60"),
-    requiredValidMessages: parseInt(env.CHECKS_REQUIRED_VALID_MESSAGES || "5"),
+    newMemberCheckDurationHours: parseInt(Deno.env.get("CHECKS_NEW_MEMBER_DURATION_HOURS") || "60"),
+    requiredValidMessages: parseInt(Deno.env.get("CHECKS_REQUIRED_VALID_MESSAGES") || "5"),
+    minMessageLength: parseInt(Deno.env.get("CHECKS_MIN_MESSAGE_LENGTH") || "10"),
+  },
+  logger: {
+    minLevel: Deno.env.get("LOG_LEVEL") || "info",
   },
 }; 

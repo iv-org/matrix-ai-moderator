@@ -2,7 +2,8 @@ import { matrixClient } from "./client.ts";
 import { config } from "../config.ts";
 import { isUsernameInappropriate } from "../checks/username.ts";
 import { kv } from "../storage.ts";
-import { RoomMemberEvent, MatrixEvent, RoomMember } from "npm:matrix-js-sdk";
+import { RoomMemberEvent, MatrixEvent, RoomMember } from "matrix-js-sdk";
+import { log } from "../logger.ts";
 
 export function setupMemberHandler() {
   matrixClient.on(RoomMemberEvent.Membership, async (event: MatrixEvent, member: RoomMember) => {
@@ -13,7 +14,7 @@ export function setupMemberHandler() {
     const botStartTime = (await kv.get(["bot_start_time"])).value as number;
     
     if (joinTimestamp <= botStartTime) {
-      console.log('Skipping old member join:', member.userId);
+      log.debug('Skipping old member join:', member.userId);
       return;
     }
     
@@ -25,7 +26,7 @@ export function setupMemberHandler() {
       
       if (inappropriate) {
         // Ban the member
-        console.log('Banning user:', username, 'from room:', config.matrix.roomId);
+        log.warn('Banning user:', username, 'from room:', config.matrix.roomId);
         await matrixClient.ban(config.matrix.roomId, username, "Inappropriate username");
         
         // Remove the user from KV storage

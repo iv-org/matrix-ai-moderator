@@ -12,6 +12,7 @@ A Deno-based Matrix bot that protects rooms by monitoring new members and their 
 - Two-strike warning system for inappropriate content
 - Automatic message deletion and user banning
 - Required number of valid messages before removing monitoring
+- Configurable minimum message length for content checks
 
 ## Prerequisites
 
@@ -38,6 +39,7 @@ A Deno-based Matrix bot that protects rooms by monitoring new members and their 
    - `OPENAI_VISION_MODEL`: The model to use for image analysis (default: gpt-4-vision-preview)
    - `CHECKS_REQUIRED_VALID_MESSAGES`: Number of valid messages required before removing monitoring (default: 5)
    - `CHECKS_NEW_MEMBER_DURATION_HOURS`: How long to monitor new members (default: 60 hours)
+   - `CHECKS_MIN_MESSAGE_LENGTH`: Minimum length of messages to check for inappropriate content (default: 10 characters)
 
 ## Running the Bot
 
@@ -53,6 +55,7 @@ deno task start
    - If appropriate, they are added to a monitoring list for the specified duration
 
 2. For messages from monitored members:
+   - Messages shorter than the minimum length are skipped
    - The content is checked for inappropriate material
    - If inappropriate:
      - The message is deleted

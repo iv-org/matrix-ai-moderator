@@ -1,5 +1,6 @@
-import OpenAI from "npm:openai";
+import OpenAI from "openai";
 import { config } from "../config.ts";
+import { log } from "../logger.ts";
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -10,7 +11,6 @@ const openai = new OpenAI({
 // Function to make OpenAI API calls
 export async function callOpenAIAPI(messages: any[], model: string, maxTokens = 300): Promise<string> {
   try {
-    console.log(messages)
     const response = await openai.chat.completions.create({
       model,
       messages,
@@ -20,7 +20,7 @@ export async function callOpenAIAPI(messages: any[], model: string, maxTokens = 
 
     return response.choices[0].message.content;
   } catch (error: any) {
-    console.error('Error calling OpenAI API:', error);
+    log.error('Error calling OpenAI API:', error);
     return "false";
   }
 }

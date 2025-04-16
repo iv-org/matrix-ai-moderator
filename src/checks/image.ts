@@ -1,6 +1,7 @@
 import { callOpenAIAPI } from "../openai/api.ts";
 import { config } from "../config.ts";
-import { MatrixClient } from "npm:matrix-js-sdk";
+import { MatrixClient } from "matrix-js-sdk";
+import { log } from "../logger.ts";
 
 export async function analyzeImage(imageUrl: string, matrixClient: MatrixClient): Promise<boolean> {
   try {
@@ -15,7 +16,6 @@ export async function analyzeImage(imageUrl: string, matrixClient: MatrixClient)
       
       // If that fails, construct the URL manually with the correct format
       if (!httpUrl) {
-        console.log('Client URL conversion failed, using manual URL construction');
         httpUrl = `https://matrix-client.matrix.org/_matrix/client/v1/media/download/${serverName}/${mediaId}`;
       }
       
@@ -41,11 +41,11 @@ export async function analyzeImage(imageUrl: string, matrixClient: MatrixClient)
       const normalizedResponse = response.toLowerCase().trim();
       return normalizedResponse === "true";
     } catch (apiError) {
-      console.error('Error calling OpenAI API:', apiError);
+      log.error('Error calling OpenAI API:', apiError);
       return false;
     }
   } catch (error) {
-    console.error('Error processing image:', error);
+    log.error('Error processing image:', error);
     return false;
   }
 } 
