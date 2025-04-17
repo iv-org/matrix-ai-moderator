@@ -6,7 +6,6 @@ compatible API.
 
 ## Features
 
-- Monitors new room members
 - Checks usernames for inappropriate content
 - Temporarily stores new members in Deno KV for monitoring
 - Monitors messages from new members
@@ -21,7 +20,7 @@ compatible API.
 
 - Deno (latest version)
 - Matrix account for the bot
-- OpenAI API key or OpenAI compatible API key (openrouter for example)
+- OpenAI API key or OpenAI compatible API key (openrouter.ai for example)
 - Access to a Matrix room you want to protect
 
 ## Setup
@@ -66,16 +65,19 @@ deno task start
 2. For messages from monitored members:
    - Messages shorter than the minimum length are skipped
    - The content is checked for inappropriate material
-   - If inappropriate:
+   - If inappropriate and it is a text message:
      - The message is deleted
      - First offense: User receives a warning
      - Second offense: User is banned
+   - If inappropriate and it is an image:
+     - The message is deleted
+     - The User is banned
    - If appropriate:
      - Message count is incremented
      - Once the required number of valid messages is reached, monitoring is
        removed
 
-3. Warning System:
+3. Warning System for text messages:
    - First inappropriate message: Warning message with 24-hour expiration
    - Second inappropriate message: Immediate ban
    - Warnings expire after 24 hours
