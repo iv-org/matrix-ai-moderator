@@ -6,6 +6,7 @@ export const config = {
         username: Deno.env.get("MATRIX_USERNAME") || "",
         password: Deno.env.get("MATRIX_PASSWORD") || "",
         roomId: Deno.env.get("MATRIX_ROOM_ID") || "",
+        roomLanguage: Deno.env.get("MATRIX_ROOM_LANGUAGE") || "English",
     },
     openai: {
         apiKey: Deno.env.get("OPENAI_API_KEY") || "",
