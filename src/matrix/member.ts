@@ -30,7 +30,7 @@ export function setupMemberHandler() {
                 if (inappropriate) {
                     // Ban the member
                     log.warn(
-                        "Banning user:",
+                        "Banning user for inappropriate username:",
                         username,
                         "from room:",
                         config.matrix.roomId,

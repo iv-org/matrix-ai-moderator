@@ -61,7 +61,7 @@ export async function deleteAllUserMessages(roomId: string, userId: string) {
                     ? content.body
                     : `[${content.msgtype}] ${content.url || ""}`;
 
-                log.debug("Deleted message from user:", {
+                log.info("Deleted message from user:", {
                     eventId: eventId,
                     content: messageContent,
                     timestamp: new Date(event.getTs()).toISOString(),

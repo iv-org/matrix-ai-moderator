@@ -164,7 +164,7 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                 } else {
                     // Second warning - ban the user
                     log.warn(
-                        "Banning user:",
+                        "Banning user for inappropriate message:",
                         sender,
                         "from room:",
                         room.roomId,
