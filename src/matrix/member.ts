@@ -22,31 +22,32 @@ export function setupMemberHandler() {
             }
 
             if (member.membership === "join") {
-                const username = member.userId;
+                const displayName = member.name;
+                const userId = member.userId;
 
                 // Check if username is inappropriate
-                const inappropriate = await isUsernameInappropriate(username);
+                const inappropriate = await isUsernameInappropriate(displayName);
 
                 if (inappropriate) {
                     // Ban the member
                     log.warn(
-                        "Banning user for inappropriate username:",
-                        username,
-                        "from room:",
-                        config.matrix.roomId,
+                        "Banning userId",
+                        userId,
+                        "for inappropriate username:",
+                        displayName
                     );
                     await matrixClient.ban(
                         config.matrix.roomId,
-                        username,
+                        userId,
                         "Automoderator: Inappropriate username",
                     );
 
                     // Remove the user from KV storage
-                    await kv.delete(["new_members", username]);
-                    await kv.delete(["warnings", username]);
+                    await kv.delete(["new_members", userId]);
+                    await kv.delete(["warnings", userId]);
                 } else {
                     // Store the member in KV with configurable expiration
-                    await kv.set(["new_members", username], true, {
+                    await kv.set(["new_members", userId], true, {
                         expireIn: config.checks.newMemberCheckDurationHours *
                             60 * 60 * 1000,
                     });

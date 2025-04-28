@@ -84,8 +84,6 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                         log.warn(
                             "Banning user for explicit image content:",
                             sender,
-                            "from room:",
-                            room.roomId,
                         );
                         await withRateLimit(() =>
                             matrixClient.ban(
@@ -166,8 +164,6 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                     log.warn(
                         "Banning user for inappropriate message:",
                         sender,
-                        "from room:",
-                        room.roomId,
                     );
 
                     // Remove the user from KV storage
