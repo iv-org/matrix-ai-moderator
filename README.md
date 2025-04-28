@@ -35,6 +35,7 @@ compatible API.
    - `MATRIX_USERNAME`: Bot's Matrix username
    - `MATRIX_PASSWORD`: Bot's Matrix password
    - `MATRIX_ROOM_ID`: ID of the room to protect
+   - `MATRIX_ROOM_LANGUAGE`: The language of the room (just for username checking at the current time)
    - `OPENAI_API_KEY`: Your OpenAI API key or OpenAI compatible API key
    - `OPENAI_API_URL`: The API endpoint URL (default: https://api.openai.com/v1)
    - `OPENAI_TEXT_MODEL`: The model to use for text analysis (default:
@@ -49,6 +50,24 @@ compatible API.
      inappropriate content (default: 10 characters)
 
 ## Running the Bot
+
+### Using docker compose
+
+```yaml
+services:
+  matrix-ai-moderator:
+    image: ghcr.io/iv-org/matrix-ai-moderator:latest
+    restart: unless-stopped
+    environment:
+    - MATRIX_HOMESERVER_URL=https://XXX
+    - MATRIX_USERNAME=XXX
+    - MATRIX_PASSWORD=XXX
+    - MATRIX_ROOM_ID=XXX
+    - OPENAI_API_KEY=XXX
+    - LOG_LEVEL=info
+```
+
+### Manually using deno
 
 ```bash
 deno task start
