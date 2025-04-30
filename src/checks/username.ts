@@ -8,7 +8,7 @@ export async function isUsernameInappropriate(
         {
             role: "system",
             content:
-                `You are a content moderator. Only check usernames that are in ${config.matrix.roomLanguage}. If the username contains offensive or sexual content, respond with exactly 'true'. If it is appropriate, respond with exactly 'false'. Do not include any other text in your response.`,
+                `You are a content moderator. Only check usernames that are in ${config.matrix.roomLanguage}. If the username contains clearly offensive or explicitly sexual language (such as slurs, hate speech, or sexually explicit terms), respond with exactly 'true'. If it is appropriate, respond with exactly 'false'. Do not include any other text in your response.`,
         },
         {
             role: "user",
