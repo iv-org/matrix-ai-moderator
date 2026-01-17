@@ -16,7 +16,7 @@ RUN curl -fsSL https://github.com/krallin/tini/releases/download/v${TINI_VERSION
 RUN deno task compile
 
 # Stage for creating the non-privileged user
-FROM alpine:3.20 AS user-stage
+FROM alpine:3.23 AS user-stage
 
 RUN adduser -u 10001 -S appuser
 
