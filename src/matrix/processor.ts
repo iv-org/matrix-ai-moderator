@@ -2,6 +2,7 @@ import { matrixClient } from "./client.ts";
 import { config } from "../config.ts";
 import { isMessageInappropriate } from "../checks/message.ts";
 import { analyzeImage } from "../checks/image.ts";
+import { isPollInappropriate } from "../checks/poll.ts";
 import { kv } from "../storage.ts";
 import { MatrixEvent, MsgType, Room } from "matrix-js-sdk";
 import { log } from "../logger.ts";
@@ -41,11 +42,16 @@ export async function processMessage(event: MatrixEvent, room: Room) {
         return;
     }
 
-    if (event.getType() === "m.room.message") {
-        // Check if sender is in the new members list
+    if (event.getType() === "m.room.message" || 
+        event.getType() === "m.poll.start" || 
+        event.getType() === "org.matrix.msc3381.poll.start" ||
+        event.getType() === "m.sticker" ||
+        event.getType() === "m.room.avatar") {
+        // In debug mode, check all messages. Otherwise, only check new members
         const isNewMember = await kv.get(["new_members", sender]);
+        const shouldCheck = config.debugMode || isNewMember.value !== null;
 
-        if (isNewMember.value !== null) {
+        if (shouldCheck) {
             let inappropriate = false;
 
             if (content.msgtype === "m.text") {
@@ -65,13 +71,15 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                 }
 
                 inappropriate = await isMessageInappropriate(content.body);
-            } else if (content.msgtype === "m.image") {
+            } else if (content.msgtype === "m.image" || event.getType() === "m.sticker") {
                 const imageUrl = content.url;
                 if (imageUrl) {
                     // Check if message is still present before processing
                     if (!await isMessageStillPresent(event.getId()!)) {
                         log.debug(
-                            "Image message was already deleted, skipping:",
+                            event.getType() === "m.sticker" 
+                                ? "Sticker was already deleted, skipping:" 
+                                : "Image message was already deleted, skipping:",
                             event.getId(),
                         );
                         return;
@@ -81,17 +89,87 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                     // For images, always ban immediately if inappropriate
                     if (inappropriate) {
                         // Ban the user immediately
-                        log.warn(
-                            "Banning user for explicit image content:",
-                            sender,
-                        );
-                        await withRateLimit(() =>
-                            matrixClient.ban(
-                                room.roomId,
+                        if (config.debugMode) {
+                            log.warn(
+                                "[DEBUG] Would ban user for explicit image content:",
                                 sender,
-                                "Automoderator: Explicit image content",
-                            )
+                            );
+                        } else {
+                            log.warn(
+                                "Banning user for explicit image content:",
+                                sender,
+                            );
+                            await withRateLimit(() =>
+                                matrixClient.ban(
+                                    room.roomId,
+                                    sender,
+                                    "Automoderator: Explicit image content",
+                                )
+                            );
+                        }
+
+                        // Remove the user from KV storage
+                        await kv.delete(["new_members", sender]);
+                        await kv.delete(["warnings", sender]);
+
+                        await delay(10000);
+
+                        // Add message deletion to queue
+                        deletionQueue.add(() =>
+                            deleteAllUserMessages(room.roomId, sender)
                         );
+                        return;
+                    }
+                }
+            } else if (event.getType() === "m.poll.start" || 
+                       event.getType() === "org.matrix.msc3381.poll.start") {
+                // Check if message is still present before processing
+                if (!await isMessageStillPresent(event.getId()!)) {
+                    log.debug(
+                        "Poll was already deleted, skipping:",
+                        event.getId(),
+                    );
+                    return;
+                }
+
+                // Pass the entire content to the poll checker
+                // It will handle both stable (m.poll) and unstable (org.matrix.msc3381.poll.start) formats
+                inappropriate = await isPollInappropriate(content);
+            } else if (event.getType() === "m.room.avatar") {
+                // Check if event is still present before processing
+                if (!await isMessageStillPresent(event.getId()!)) {
+                    log.debug(
+                        "Room avatar change was already deleted, skipping:",
+                        event.getId(),
+                    );
+                    return;
+                }
+
+                // Check room avatar image
+                const avatarUrl = content.url;
+                if (avatarUrl) {
+                    inappropriate = await analyzeImage(avatarUrl, matrixClient);
+                    // For room avatar, always ban immediately if inappropriate
+                    if (inappropriate) {
+                        // Ban the user immediately
+                        if (config.debugMode) {
+                            log.warn(
+                                "[DEBUG] Would ban user for inappropriate room avatar:",
+                                sender,
+                            );
+                        } else {
+                            log.warn(
+                                "Banning user for inappropriate room avatar:",
+                                sender,
+                            );
+                            await withRateLimit(() =>
+                                matrixClient.ban(
+                                    room.roomId,
+                                    sender,
+                                    "Automoderator: Inappropriate room avatar",
+                                )
+                            );
+                        }
 
                         // Remove the user from KV storage
                         await kv.delete(["new_members", sender]);
@@ -161,22 +239,29 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                     );
                 } else {
                     // Second warning - ban the user
-                    log.warn(
-                        "Banning user for inappropriate message:",
-                        sender,
-                    );
-
-                    // Remove the user from KV storage
-                    await kv.delete(["new_members", sender]);
-                    await kv.delete(["warnings", sender]);
-
-                    await withRateLimit(() =>
-                        matrixClient.ban(
-                            room.roomId,
+                    if (config.debugMode) {
+                        log.warn(
+                            "[DEBUG] Would ban user for inappropriate message:",
                             sender,
-                            "Automoderator: Inappropriate content after warning",
-                        )
-                    );
+                        );
+                    } else {
+                        log.warn(
+                            "Banning user for inappropriate message:",
+                            sender,
+                        );
+
+                        // Remove the user from KV storage
+                        await kv.delete(["new_members", sender]);
+                        await kv.delete(["warnings", sender]);
+
+                        await withRateLimit(() =>
+                            matrixClient.ban(
+                                room.roomId,
+                                sender,
+                                "Automoderator: Inappropriate content after warning",
+                            )
+                        );
+                    }
 
                     await delay(5000);
 

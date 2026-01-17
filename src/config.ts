@@ -29,4 +29,5 @@ export const config = {
     logger: {
         minLevel: Deno.env.get("LOG_LEVEL") || "info",
     },
+    debugMode: Deno.env.get("DEBUG_MODE")?.toLowerCase() === "true",
 };
