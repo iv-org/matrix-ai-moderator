@@ -4,9 +4,9 @@
         "compile": "deno compile --allow-net --allow-read=.env --allow-env --output ai_matrix_harm_detection src/main.ts"
     },
     "imports": {
-        "matrix-js-sdk": "npm:matrix-js-sdk@^37.3.0",
-        "openai": "npm:openai@^4.94.0",
-        "dotenv": "jsr:@std/dotenv@0.225.3/load",
+        "matrix-js-sdk": "npm:matrix-js-sdk@^40.0.0",
+        "openai": "npm:openai@^6.16.0",
+        "dotenv": "jsr:@std/dotenv@0.225.6/load",
         "@onjara/optic": "jsr:@onjara/optic@^2.0.3",
         "p-queue": "https://deno.land/x/p_queue@1.0.1/mod.ts"
     },
