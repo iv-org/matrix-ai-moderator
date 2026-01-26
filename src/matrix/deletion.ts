@@ -51,15 +51,15 @@ export async function deleteAllUserMessages(roomId: string, userId: string) {
             }
 
             try {
-                await withRateLimit(() =>
-                    matrixClient.redactEvent(roomId, eventId)
-                );
-
-                // Log full message content
+                // Capture message content BEFORE deleting
                 const content = event.getContent();
                 const messageContent = content.msgtype === "m.text"
                     ? content.body
                     : `[${content.msgtype}] ${content.url || ""}`;
+
+                await withRateLimit(() =>
+                    matrixClient.redactEvent(roomId, eventId)
+                );
 
                 log.info("Deleted message from user:", {
                     eventId: eventId,
