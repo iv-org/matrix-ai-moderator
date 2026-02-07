@@ -2,7 +2,7 @@ import { matrixClient } from "./client.ts";
 import { config } from "../config.ts";
 import { isMessageInappropriate } from "../checks/message.ts";
 import { analyzeImage } from "../checks/image.ts";
-import { isPollInappropriate } from "../checks/poll.ts";
+import { isPollInappropriate, pollContentToText } from "../checks/poll.ts";
 import { kv } from "../storage.ts";
 import { MatrixEvent, MsgType, Room } from "matrix-js-sdk";
 import { log } from "../logger.ts";
@@ -12,6 +12,7 @@ import {
     deletionQueue,
     isMessageStillPresent,
 } from "./deletion.ts";
+import { fallbackUnsafeText } from "../checks/fallback.ts";
 
 export async function processMessage(event: MatrixEvent, room: Room) {
     const sender = event.getSender();
@@ -42,11 +43,13 @@ export async function processMessage(event: MatrixEvent, room: Room) {
         return;
     }
 
-    if (event.getType() === "m.room.message" || 
-        event.getType() === "m.poll.start" || 
+    if (
+        event.getType() === "m.room.message" ||
+        event.getType() === "m.poll.start" ||
         event.getType() === "org.matrix.msc3381.poll.start" ||
         event.getType() === "m.sticker" ||
-        event.getType() === "m.room.avatar") {
+        event.getType() === "m.room.avatar"
+    ) {
         // In debug mode, check all messages. Otherwise, only check new members
         const isNewMember = await kv.get(["new_members", sender]);
         const shouldCheck = config.debugMode || isNewMember.value !== null;
@@ -71,14 +74,24 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                 }
 
                 inappropriate = await isMessageInappropriate(content.body);
-            } else if (content.msgtype === "m.image" || event.getType() === "m.sticker") {
+
+                if (!inappropriate && fallbackUnsafeText(content.body)) {
+                    log.warn(
+                        "Fallback filter flagged message despite LLM approval",
+                        { sender, eventId: event.getId() },
+                    );
+                    inappropriate = true;
+                }
+            } else if (
+                content.msgtype === "m.image" || event.getType() === "m.sticker"
+            ) {
                 const imageUrl = content.url;
                 if (imageUrl) {
                     // Check if message is still present before processing
                     if (!await isMessageStillPresent(event.getId()!)) {
                         log.debug(
-                            event.getType() === "m.sticker" 
-                                ? "Sticker was already deleted, skipping:" 
+                            event.getType() === "m.sticker"
+                                ? "Sticker was already deleted, skipping:"
                                 : "Image message was already deleted, skipping:",
                             event.getId(),
                         );
@@ -121,8 +134,10 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                         return;
                     }
                 }
-            } else if (event.getType() === "m.poll.start" || 
-                       event.getType() === "org.matrix.msc3381.poll.start") {
+            } else if (
+                event.getType() === "m.poll.start" ||
+                event.getType() === "org.matrix.msc3381.poll.start"
+            ) {
                 // Check if message is still present before processing
                 if (!await isMessageStillPresent(event.getId()!)) {
                     log.debug(
@@ -134,7 +149,17 @@ export async function processMessage(event: MatrixEvent, room: Room) {
 
                 // Pass the entire content to the poll checker
                 // It will handle both stable (m.poll) and unstable (org.matrix.msc3381.poll.start) formats
+                const pollText = pollContentToText(content);
                 inappropriate = await isPollInappropriate(content);
+                if (
+                    !inappropriate && pollText && fallbackUnsafeText(pollText)
+                ) {
+                    log.warn(
+                        "Fallback filter flagged poll text despite LLM approval",
+                        { sender, eventId: event.getId() },
+                    );
+                    inappropriate = true;
+                }
             } else if (event.getType() === "m.room.avatar") {
                 // Check if event is still present before processing
                 if (!await isMessageStillPresent(event.getId()!)) {
@@ -275,13 +300,22 @@ export async function processMessage(event: MatrixEvent, room: Room) {
                 const warningCount = await kv.get(["warnings", sender]);
                 if (warningCount.value === null) {
                     // Only count valid messages if user has no warnings
-                    const validMessages = await kv.get(["valid_messages", sender]);
-                    const currentCount = (validMessages.value as number | null) ?? 0;
+                    const validMessages = await kv.get([
+                        "valid_messages",
+                        sender,
+                    ]);
+                    const currentCount =
+                        (validMessages.value as number | null) ?? 0;
                     await kv.set(["valid_messages", sender], currentCount + 1);
 
                     // Check if user has passed the required number of valid messages
-                    if (currentCount + 1 >= config.checks.requiredValidMessages) {
-                        log.debug("User has passed required valid messages threshold, removing from monitoring:", sender);
+                    if (
+                        currentCount + 1 >= config.checks.requiredValidMessages
+                    ) {
+                        log.debug(
+                            "User has passed required valid messages threshold, removing from monitoring:",
+                            sender,
+                        );
                         await kv.delete(["new_members", sender]);
                         await kv.delete(["valid_messages", sender]);
                     }

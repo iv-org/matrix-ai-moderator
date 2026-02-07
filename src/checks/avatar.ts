@@ -2,6 +2,12 @@ import { callOpenAIAPI } from "../openai/api.ts";
 import { config } from "../config.ts";
 import { MatrixClient } from "matrix-js-sdk";
 import { log } from "../logger.ts";
+import {
+    buildJsonUserPrompt,
+    buildSystemPrompt,
+    MODERATION_RESPONSE_FORMAT,
+    parseModerationResponse,
+} from "../openai/prompt.ts";
 
 export async function analyzeAvatar(
     avatarUrl: string,
@@ -32,31 +38,36 @@ export async function analyzeAvatar(
                 `${httpUrl}?access_token=${matrixClient.getAccessToken()}`;
         }
 
-        const messages = [
-            {
-                role: "user",
-                content: [
-                    {
-                        type: "text",
-                        text:
-                            "You are a content moderator. Check if the following image is inappropriate, explicit content, scam, marketing, or contains any nudity. You must respond with exactly 'true' if inappropriate, or exactly 'false' if appropriate. Do not include any other text in your response.",
-                    },
-                    {
-                        type: "image_url",
-                        image_url: avatarUrl,
-                    },
-                ],
-            },
-        ];
+        const systemPrompt = buildSystemPrompt(
+            "Check if the following avatar image is inappropriate, explicit content, scam, marketing, or contains any nudity. Respond with 'true' for inappropriate or 'false' for appropriate.",
+        );
+        const metadataPrompt = buildJsonUserPrompt(
+            "Inspect the avatar image below. Use metadata for context only and set unsafe=true if it violates policy.",
+            { source: "m.room.member", type: "avatar", url: avatarUrl },
+        );
 
         try {
             const response = await callOpenAIAPI(
-                messages,
+                [
+                    { role: "system", content: systemPrompt },
+                    {
+                        role: "user",
+                        content: [
+                            { type: "text", text: metadataPrompt },
+                            { type: "image_url", image_url: avatarUrl },
+                        ],
+                    },
+                ],
                 config.openai.visionModel,
-                300,
+                { responseFormat: MODERATION_RESPONSE_FORMAT },
             );
-            const normalizedResponse = response.toLowerCase().trim();
-            return normalizedResponse === "true";
+            const result = parseModerationResponse(response);
+            if (!result.valid) {
+                log.warn("Invalid moderation response for avatar", {
+                    response,
+                });
+            }
+            return result.unsafe;
         } catch (apiError) {
             log.error("Error calling OpenAI API for avatar:", apiError);
             return false;

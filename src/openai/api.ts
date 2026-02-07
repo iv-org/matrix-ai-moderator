@@ -8,20 +8,41 @@ const openai = new OpenAI({
     baseURL: config.openai.apiUrl,
 });
 
+type ResponseFormat = {
+    type: string;
+    [key: string]: unknown;
+};
+
+interface CallOpenAIOptions {
+    maxTokens?: number;
+    responseFormat?: ResponseFormat;
+}
+
 // Function to make OpenAI API calls
 export async function callOpenAIAPI(
     messages: any[],
     model: string,
-    maxTokens = 300,
+    maxTokensOrOptions: number | CallOpenAIOptions = 300,
 ): Promise<string> {
+    const options = typeof maxTokensOrOptions === "number"
+        ? { maxTokens: maxTokensOrOptions }
+        : maxTokensOrOptions;
+    const maxTokens = options.maxTokens ?? 300;
     try {
         log.debug("Sending request to OpenAI:", { model, messages, maxTokens });
-        const response = await openai.chat.completions.create({
+        const requestPayload: Record<string, unknown> = {
             model,
             messages,
             max_tokens: maxTokens,
             temperature: 0,
-        });
+        };
+        if (options.responseFormat) {
+            requestPayload.response_format = options.responseFormat;
+        }
+
+        const response = await openai.chat.completions.create(
+            requestPayload as any,
+        );
 
         const content = response.choices[0].message.content;
         log.debug("Received response from OpenAI:", { content });

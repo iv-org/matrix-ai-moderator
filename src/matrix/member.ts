@@ -35,7 +35,9 @@ export function setupMemberHandler() {
                 );
 
                 // Check if username is inappropriate
-                const usernameInappropriate = await isUsernameInappropriate(displayName);
+                const usernameInappropriate = await isUsernameInappropriate(
+                    displayName,
+                );
 
                 if (usernameInappropriate) {
                     // Ban the member
@@ -44,14 +46,14 @@ export function setupMemberHandler() {
                             "[DEBUG] Would ban userId",
                             userId,
                             "for inappropriate username:",
-                            displayName
+                            displayName,
                         );
                     } else {
                         log.warn(
                             "Banning userId",
                             userId,
                             "for inappropriate username:",
-                            displayName
+                            displayName,
                         );
                         await matrixClient.ban(
                             config.matrix.roomId,
@@ -69,7 +71,10 @@ export function setupMemberHandler() {
                 // Check if avatar is inappropriate (if user has an avatar)
                 if (avatarUrl) {
                     log.debug("Checking avatar for user:", userId);
-                    const avatarInappropriate = await analyzeAvatar(avatarUrl, matrixClient);
+                    const avatarInappropriate = await analyzeAvatar(
+                        avatarUrl,
+                        matrixClient,
+                    );
 
                     if (avatarInappropriate) {
                         // Ban the member
@@ -77,13 +82,13 @@ export function setupMemberHandler() {
                             log.warn(
                                 "[DEBUG] Would ban userId",
                                 userId,
-                                "for inappropriate avatar"
+                                "for inappropriate avatar",
                             );
                         } else {
                             log.warn(
                                 "Banning userId",
                                 userId,
-                                "for inappropriate avatar"
+                                "for inappropriate avatar",
                             );
                             await matrixClient.ban(
                                 config.matrix.roomId,

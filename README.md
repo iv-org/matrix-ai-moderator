@@ -13,6 +13,8 @@ compatible API.
   - Stickers
   - Poll questions and answers
   - Room avatar changes
+- **Doxxing Protection**: Flags messages that leak personal data such as full
+  names combined with home addresses, birthdates, or other identifying details
 - **Temporary Member Monitoring**: Stores new members in Deno KV for time-limited monitoring
 - **AI-Powered Detection**: Uses OpenAI API or any OpenAI-compatible API (like OpenRouter) to detect inappropriate content
 - **Two-Strike Warning System**: 

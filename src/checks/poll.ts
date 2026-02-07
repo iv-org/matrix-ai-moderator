@@ -1,6 +1,12 @@
 import { callOpenAIAPI } from "../openai/api.ts";
 import { config } from "../config.ts";
 import { log } from "../logger.ts";
+import {
+    buildJsonUserPrompt,
+    buildSystemPrompt,
+    MODERATION_RESPONSE_FORMAT,
+    parseModerationResponse,
+} from "../openai/prompt.ts";
 
 // Types for stable m.poll.start format (MSC3381)
 interface StablePollContent {
@@ -28,96 +34,92 @@ interface UnstablePollContent {
     };
 }
 
-export async function isPollInappropriate(pollContent: Record<string, unknown>): Promise<boolean> {
-    try {
-        let question = "";
-        const answers: string[] = [];
+export function pollContentToText(
+    pollContent: Record<string, unknown>,
+): string {
+    let question = "";
+    const answers: string[] = [];
 
-        // Try stable format first (m.poll)
-        const stableContent = pollContent as StablePollContent;
-        if (stableContent["m.poll"]) {
-            const poll = stableContent["m.poll"];
-            
-            // Extract question from stable format
-            if (poll.question?.["m.text"]?.[0]?.body) {
-                question = poll.question["m.text"][0].body;
+    const stableContent = pollContent as StablePollContent;
+    if (stableContent["m.poll"]) {
+        const poll = stableContent["m.poll"];
+        if (poll.question?.["m.text"]?.[0]?.body) {
+            question = poll.question["m.text"][0].body;
+        }
+        if (poll.answers && Array.isArray(poll.answers)) {
+            for (const answer of poll.answers) {
+                const answerText = answer["m.text"]?.[0]?.body;
+                if (answerText) {
+                    answers.push(answerText);
+                }
             }
-            
-            // Extract answers from stable format
+        }
+    }
+
+    if (!question) {
+        const unstableContent = pollContent as UnstablePollContent;
+        if (unstableContent["org.matrix.msc3381.poll.start"]) {
+            const poll = unstableContent["org.matrix.msc3381.poll.start"];
+            if (poll.question?.["org.matrix.msc1767.text"]) {
+                question = poll.question["org.matrix.msc1767.text"];
+            }
             if (poll.answers && Array.isArray(poll.answers)) {
                 for (const answer of poll.answers) {
-                    const answerText = answer["m.text"]?.[0]?.body;
+                    const answerText = answer["org.matrix.msc1767.text"];
                     if (answerText) {
                         answers.push(answerText);
                     }
                 }
             }
         }
-        
-        // Try unstable format if stable didn't work (org.matrix.msc3381.poll.start)
-        if (!question) {
-            const unstableContent = pollContent as UnstablePollContent;
-            if (unstableContent["org.matrix.msc3381.poll.start"]) {
-                const poll = unstableContent["org.matrix.msc3381.poll.start"];
-                
-                // Extract question from unstable format
-                if (poll.question?.["org.matrix.msc1767.text"]) {
-                    question = poll.question["org.matrix.msc1767.text"];
-                }
-                
-                // Extract answers from unstable format
-                if (poll.answers && Array.isArray(poll.answers)) {
-                    for (const answer of poll.answers) {
-                        const answerText = answer["org.matrix.msc1767.text"];
-                        if (answerText) {
-                            answers.push(answerText);
-                        }
-                    }
-                }
-            }
-        }
+    }
 
-        // If we couldn't extract any content, skip moderation
-        if (!question && answers.length === 0) {
+    if (!question && answers.length === 0) {
+        return "";
+    }
+
+    return `Question: ${question}\nAnswers: ${answers.join(", ")}`;
+}
+
+export async function isPollInappropriate(
+    pollContent: Record<string, unknown>,
+): Promise<boolean> {
+    try {
+        const pollText = pollContentToText(pollContent);
+        if (!pollText) {
             log.warn("Could not parse poll content structure");
             return false;
         }
 
-        // Combine question and answers for analysis
-        const pollText = `Question: ${question}\nAnswers: ${answers.join(", ")}`;
-
         log.debug("Checking poll content:", pollText);
 
-        // Skip if poll text is too short
         if (pollText.length < config.checks.minMessageLength) {
             log.debug("Skipping short poll");
             return false;
         }
 
-        const messages = [
-            {
-                role: "system",
-                content:
-                    "You are a content moderator. Your job is to detect inappropriate, explicit, scam, marketing, or spam content. You must respond with exactly 'true' if the content is inappropriate, or exactly 'false' if it's appropriate. Do not include any other text in your response.",
-            },
-            {
-                role: "user",
-                content: pollText,
-            },
-        ];
+        const systemPrompt = buildSystemPrompt(
+            "Check if the following poll content is inappropriate, explicit, hateful, scam, marketing, or spam. Respond with 'true' for inappropriate or 'false' for appropriate.",
+        );
+        const userPrompt = buildJsonUserPrompt(
+            "Review the `poll_text` string and set unsafe=true if it violates the policy.",
+            { poll_text: pollText },
+        );
 
-        try {
-            const response = await callOpenAIAPI(
-                messages,
-                config.openai.textModel,
-                300,
-            );
-            const normalizedResponse = response.toLowerCase().trim();
-            return normalizedResponse === "true";
-        } catch (apiError) {
-            log.error("Error calling OpenAI API for poll:", apiError);
-            return false;
+        const response = await callOpenAIAPI(
+            [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt },
+            ],
+            config.openai.textModel,
+            { responseFormat: MODERATION_RESPONSE_FORMAT },
+        );
+
+        const result = parseModerationResponse(response);
+        if (!result.valid) {
+            log.warn("Invalid moderation response for poll", { response });
         }
+        return result.unsafe;
     } catch (error) {
         log.error("Error processing poll:", error);
         return false;
