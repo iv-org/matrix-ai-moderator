@@ -66,7 +66,6 @@ export async function analyzeAvatar(
                 log.warn("Invalid moderation response for avatar", {
                     response,
                 });
-                return false;
             }
             return result.unsafe;
         } catch (apiError) {

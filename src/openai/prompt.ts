@@ -44,5 +44,5 @@ export function parseModerationResponse(raw: string): ModerationParseResult {
     } catch (_error) {
         // Ignore parsing error, handled below
     }
-    return { unsafe: true, valid: false };
+    return { unsafe: false, valid: false };
 }
