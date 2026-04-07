@@ -53,9 +53,17 @@ export async function deleteAllUserMessages(roomId: string, userId: string) {
             try {
                 // Capture message content BEFORE deleting
                 const content = event.getContent();
-                const messageContent = content.msgtype === "m.text"
-                    ? content.body
-                    : `[${content.msgtype}] ${content.url || ""}`;
+                let messageContent = "";
+
+                if (content.msgtype === "m.text" && content.body) {
+                    messageContent = content.body;
+                } else if (content.msgtype && content.url) {
+                    messageContent = `[${content.msgtype}] ${content.url}`;
+                } else if (content.body) {
+                    messageContent = content.body;
+                } else {
+                    messageContent = `[${content.msgtype || "unknown"}]`;
+                }
 
                 await withRateLimit(() =>
                     matrixClient.redactEvent(roomId, eventId)
