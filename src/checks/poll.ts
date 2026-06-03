@@ -99,7 +99,7 @@ export async function isPollInappropriate(
         }
 
         const systemPrompt = buildSystemPrompt(
-            "Check if the following poll content is inappropriate, explicit, hateful, scam, marketing, or spam. Respond with 'true' for inappropriate or 'false' for appropriate.",
+            "Check if the following poll content is inappropriate, explicit, hateful, scam, marketing, or spam. Only respond with 'true' for inappropriate or 'false' for appropriate.",
         );
         const userPrompt = buildJsonUserPrompt(
             "Review the `poll_text` string and set unsafe=true if it violates the policy.",

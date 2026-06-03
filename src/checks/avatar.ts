@@ -39,7 +39,7 @@ export async function analyzeAvatar(
         }
 
         const systemPrompt = buildSystemPrompt(
-            "Check if the following avatar image is inappropriate, explicit content, scam, marketing, or contains any nudity. Respond with 'true' for inappropriate or 'false' for appropriate.",
+            "Check if the following avatar image is inappropriate, explicit content, scam, marketing, or contains any nudity. Only respond with 'true' for inappropriate or 'false' for appropriate.",
         );
         const metadataPrompt = buildJsonUserPrompt(
             "Inspect the avatar image below. Use metadata for context only and set unsafe=true if it violates policy.",

@@ -12,7 +12,7 @@ export async function isUsernameInappropriate(
     username: string,
 ): Promise<boolean> {
     const systemPrompt = buildSystemPrompt(
-        `Only check usernames that are in ${config.matrix.roomLanguage}. If the username contains clearly offensive or explicitly sexual language (such as slurs, hate speech, or sexually explicit terms), respond with 'true'. If it is appropriate, respond with 'false'.`,
+        `Only check usernames that are in ${config.matrix.roomLanguage}. If the username contains clearly offensive or explicitly sexual language (such as slurs, hate speech, or sexually explicit terms), only respond with 'true'. If it is appropriate, only respond with 'false'.`,
     );
     const userPrompt = buildJsonUserPrompt(
         "Look at the `username` value and set unsafe=true when it violates these rules.",

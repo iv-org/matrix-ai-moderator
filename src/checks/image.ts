@@ -39,7 +39,7 @@ export async function analyzeImage(
         }
 
         const systemPrompt = buildSystemPrompt(
-            "Check if the following image is inappropriate, explicit content, scam, marketing, or contains any nudity. Respond with 'true' for inappropriate or 'false' for appropriate.",
+            "Check if the following image is inappropriate, explicit content, scam, marketing, or contains any nudity. Only respond with 'true' for inappropriate or 'false' for appropriate.",
         );
         const metadataPrompt = buildJsonUserPrompt(
             "Inspect the referenced image. Use the metadata for context only and set unsafe=true when the picture violates the policy.",

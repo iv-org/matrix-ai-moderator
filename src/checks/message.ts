@@ -12,7 +12,7 @@ export async function isMessageInappropriate(
     content: string,
 ): Promise<boolean> {
     const systemPrompt = buildSystemPrompt(
-        "Check if the following message is inappropriate, offensive, scam, phishing, marketing, contains harmful content, or attempts to dox someone by sharing personal identifiers such as full name, birth date, phone number, or home address. Respond with 'true' for inappropriate or 'false' for appropriate.",
+        "Check if the following message is inappropriate, offensive, scam, phishing, marketing, contains harmful content, or attempts to dox someone by sharing personal identifiers such as full name, birth date, phone number, or home address. Only respond with 'true' for inappropriate or 'false' for appropriate.",
     );
     const userPrompt = buildJsonUserPrompt(
         "Evaluate the `body` field. Set unsafe=true when it contains the prohibited content above, including leaking another person's home address or combined name + location data. Set unsafe=false otherwise.",
