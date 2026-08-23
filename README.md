@@ -42,6 +42,8 @@ compatible API.
    - `OPENAI_API_URL`: The API endpoint URL (default: https://api.openai.com/v1)
    - `OPENAI_TEXT_MODEL`: Model for text analysis (default: gpt-3.5-turbo)
    - `OPENAI_VISION_MODEL`: Model for image analysis (default: gpt-4-vision-preview)
+   - `OPENAI_PROVIDER_ORDER`: Force one or multiple specific providers (OpenRouter routing, only applied when `OPENAI_API_URL` points to openrouter.ai). Comma-separated provider slugs in priority order (e.g. `inceptron,deepinfra`). Leave empty for default routing
+   - `OPENAI_PROVIDER_ALLOW_FALLBACKS`: When `false`, requests are served exclusively by the providers listed in `OPENAI_PROVIDER_ORDER` with no fallback to others (default: true)
    - `CHECKS_REQUIRED_VALID_MESSAGES`: Number of valid messages required before removing monitoring (default: 5)
    - `CHECKS_NEW_MEMBER_DURATION_HOURS`: How long to monitor new members in hours (default: 60)
    - `CHECKS_MIN_MESSAGE_LENGTH`: Minimum message length to check (default: 10 characters)

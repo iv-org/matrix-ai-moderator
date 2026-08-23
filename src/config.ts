@@ -14,6 +14,13 @@ export const config = {
         textModel: Deno.env.get("OPENAI_TEXT_MODEL") || "gpt-3.5-turbo",
         visionModel: Deno.env.get("OPENAI_VISION_MODEL") ||
             "gpt-4-vision-preview",
+        providerOrder: (Deno.env.get("OPENAI_PROVIDER_ORDER") || "")
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean),
+        providerAllowFallbacks:
+            Deno.env.get("OPENAI_PROVIDER_ALLOW_FALLBACKS")?.toLowerCase() !==
+                "false",
     },
     checks: {
         newMemberCheckDurationHours: parseInt(

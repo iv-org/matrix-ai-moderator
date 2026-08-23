@@ -8,6 +8,15 @@ const openai = new OpenAI({
     baseURL: config.openai.apiUrl,
 });
 
+function isOpenRouterUrl(url: string): boolean {
+    try {
+        return new URL(url).hostname === "openrouter.ai" ||
+            new URL(url).hostname.endsWith(".openrouter.ai");
+    } catch {
+        return false;
+    }
+}
+
 type ResponseFormat = {
     type: string;
     [key: string]: unknown;
@@ -38,6 +47,15 @@ export async function callOpenAIAPI(
         };
         if (options.responseFormat) {
             requestPayload.response_format = options.responseFormat;
+        }
+        if (
+            config.openai.providerOrder.length > 0 &&
+            isOpenRouterUrl(config.openai.apiUrl)
+        ) {
+            requestPayload.provider = {
+                order: config.openai.providerOrder,
+                allow_fallbacks: config.openai.providerAllowFallbacks,
+            };
         }
 
         const response = await openai.chat.completions.create(
