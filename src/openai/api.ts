@@ -38,7 +38,6 @@ type ResponseFormat = {
 };
 
 interface CallOpenAIOptions {
-    maxTokens?: number;
     responseFormat?: ResponseFormat;
 }
 
@@ -46,18 +45,13 @@ interface CallOpenAIOptions {
 export async function callOpenAIAPI(
     messages: any[],
     model: string,
-    maxTokensOrOptions: number | CallOpenAIOptions = 300,
+    options: CallOpenAIOptions = {},
 ): Promise<string> {
-    const options = typeof maxTokensOrOptions === "number"
-        ? { maxTokens: maxTokensOrOptions }
-        : maxTokensOrOptions;
-    const maxTokens = options.maxTokens ?? 300;
     try {
-        log.debug("Sending request to OpenAI:", { model, messages, maxTokens });
+        log.debug("Sending request to OpenAI:", { model, messages });
         const requestPayload: Record<string, unknown> = {
             model,
             messages,
-            max_tokens: maxTokens,
             temperature: 0,
         };
         if (options.responseFormat) {
