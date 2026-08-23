@@ -17,6 +17,21 @@ function isOpenRouterUrl(url: string): boolean {
     }
 }
 
+function getProviderPrefs(model: string): {
+    order: string[];
+    allowFallbacks: boolean;
+} {
+    return model === config.openai.visionModel
+        ? {
+            order: config.openai.visionModelProviderOrder,
+            allowFallbacks: config.openai.visionModelAllowFallbacks,
+        }
+        : {
+            order: config.openai.textModelProviderOrder,
+            allowFallbacks: config.openai.textModelAllowFallbacks,
+        };
+}
+
 type ResponseFormat = {
     type: string;
     [key: string]: unknown;
@@ -48,13 +63,14 @@ export async function callOpenAIAPI(
         if (options.responseFormat) {
             requestPayload.response_format = options.responseFormat;
         }
+        const providerPrefs = getProviderPrefs(model);
         if (
-            config.openai.providerOrder.length > 0 &&
+            providerPrefs.order.length > 0 &&
             isOpenRouterUrl(config.openai.apiUrl)
         ) {
             requestPayload.provider = {
-                order: config.openai.providerOrder,
-                allow_fallbacks: config.openai.providerAllowFallbacks,
+                order: providerPrefs.order,
+                allow_fallbacks: providerPrefs.allowFallbacks,
             };
         }
 
